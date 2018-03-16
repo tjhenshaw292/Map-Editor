@@ -3,9 +3,9 @@
 
 int main()
 {
-	MapMaker makeMe("pokeTiles2.png", sf::Vector2u(16, 16), 800, 352);
-	makeMe.load("firstTown.dat");
+	MapMaker makeMe("pokeTiles2.png", sf::Vector2u(16, 16), 160, 144);
+	makeMe.load("pokeMart.dat");
 	makeMe.display();
-	makeMe.save("firstTown.dat");
+	makeMe.save("pokeMart.dat");
 	return 0;
 }
