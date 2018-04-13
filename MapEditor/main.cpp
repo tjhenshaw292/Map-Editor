@@ -3,9 +3,11 @@
 
 int main()
 {
-	MapMaker makeMe("pokeTiles2.png", sf::Vector2u(16, 16), 160, 144);
-	makeMe.load("pokeMart.dat");
+	if (!MapMaker::mainFont.loadFromFile("Carlito-Regular.ttf"))
+		throw;
+	MapMaker makeMe("pokeTiles2.png", sf::Vector2u(16, 16), 240, 160);
+	//makeMe.load("newArea.dat");
 	makeMe.display();
-	makeMe.save("pokeMart.dat");
+	makeMe.save("newArea.dat");
 	return 0;
 }

@@ -1,13 +1,18 @@
 #include "stdafx.h"
 #include "MapMaker.h"
+#include "TaskBar.h"
 
-MapMaker::MapMaker(std::string tileSetName, sf::Vector2u tileSize, unsigned int mapWidth, unsigned int mapHeight)
-	: m_tileSetName{ tileSetName }, m_tileSize{ tileSize }, m_selectedTile{ 0 }, drawLines{ true }, drawBackground{ true }, drawForeground{ true }, drawLetters{ true }, drawMask{ true }
+MapMaker::MapMaker(std::string tileSetName, sf::Vector2u tileSize, unsigned int mapWidth, unsigned int mapHeight): 
+	m_tileSetName{ tileSetName }, 
+	m_tileSize{ tileSize }, 
+	m_selectedTile{ 0 }, 
+	//drawLines{ true }, 
+	drawBackground{ true }, 
+	drawForeground{ true }, 
+	drawLetters{ true }, 
+	drawMask{ true }
 {
 	if (!m_tileSet.loadFromFile(m_tileSetName))
-		throw;
-	
-	if (!m_font.loadFromFile("Carlito-Regular.ttf"))
 		throw;
 
 	//initialize tile objects
@@ -16,7 +21,7 @@ MapMaker::MapMaker(std::string tileSetName, sf::Vector2u tileSize, unsigned int 
 	m_mask.create(&m_tileSet, sf::Vector2u(mapWidth, mapHeight), m_tileSize);
 	m_tileSheet.create(&m_tileSet, m_tileSet.getSize(), m_tileSize);
 
-	for (int i{ 0 }; i < m_tileSheet.m_tiles.size(); ++i)
+	for (unsigned int i{ 0 }; i < m_tileSheet.m_tiles.size(); ++i)
 		m_tileSheet.m_tiles[i].tileNumber = i;
 
 	for (auto &element : m_foreground.m_tiles)
@@ -30,7 +35,7 @@ MapMaker::MapMaker(std::string tileSetName, sf::Vector2u tileSize, unsigned int 
 	m_mask.reAssign(m_tileSize);
 
 	m_background.getSize().y >= m_tileSheet.getSize().y ? m_windowHeight = m_background.getSize().y : m_windowHeight = m_tileSheet.getSize().y; //get bigger height
-	m_tileSheet.setPosition(m_background.getSize().x, 0);
+	m_tileSheet.setPosition(static_cast<float>(m_background.getSize().x), 0);
 	createLines();
 	m_background.sectionTiles(m_tileSize);
 	m_tileSheet.sectionTiles(m_tileSize);
@@ -42,6 +47,10 @@ void MapMaker::display()
 {
 	unsigned int windowWidth{ m_background.getSize().x + m_tileSheet.getSize().x };
 	m_window.create(sf::VideoMode(windowWidth, m_windowHeight), "Map Editor");
+
+	//Make Task Window
+	m_taskWindow = new TaskWindow{ sf::Vector2u(300, 300), &m_tileSet, m_tileSize, mainFont };
+	m_taskWindow->setCurrentTile(m_selectedTile);
 
 	sf::Event eventy;
 
@@ -55,12 +64,13 @@ void MapMaker::display()
 			m_window.draw(m_foreground);
 		if (drawMask)
 			m_window.draw(m_mask);
-		if (drawLines)
+		if (m_taskWindow->m_lineToggle.isOn())
 			m_window.draw(m_lines);
 		if (drawLetters)
 			for (auto &element : m_letters)
 				m_window.draw(element);
 		m_window.display();
+		m_taskWindow->display();
 		m_window.pollEvent(eventy);
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
 			handleClick(sf::Mouse::Left, sf::Mouse::getPosition(m_window));
@@ -110,42 +120,42 @@ void MapMaker::createLines()
 	//horiz map lines
 	for (int i{ 0 }, k{ static_cast<int>(m_tileSize.y) }; i < bounds[0]; i += 2, k += static_cast<int>(m_tileSize.y))
 	{
-		m_lines[i].position = sf::Vector2f(0, k);
-		m_lines[i + 1].position = sf::Vector2f(tileSheetXOffset, k);
+		m_lines[i].position = sf::Vector2f(0, static_cast<float>(k));
+		m_lines[i + 1].position = sf::Vector2f(static_cast<float>(tileSheetXOffset), static_cast<float>(k));
 		m_lines[i].color = sf::Color::Red;
 		m_lines[i + 1].color = sf::Color::Red;
 	}
 	//vertical map lines
 	for (int i{ bounds[0] }, k{ static_cast<int>(m_tileSize.x) }; i < bounds[1]; i += 2, k += static_cast<int>(m_tileSize.x))
 	{
-		m_lines[i].position = sf::Vector2f(k, 0);
-		m_lines[i + 1].position = sf::Vector2f(k, m_background.getSize().y);
+		m_lines[i].position = sf::Vector2f(static_cast<float>(k), 0);
+		m_lines[i + 1].position = sf::Vector2f(static_cast<float>(k), static_cast<float>(m_background.getSize().y));
 		m_lines[i].color = sf::Color::Red;
 		m_lines[i + 1].color = sf::Color::Red;
 	}
 	//horiz sheet lines
 	for (int i{ bounds[1] }, k{ static_cast<int>(m_tileSize.y) }; i < bounds[2]; i += 2, k += static_cast<int>(m_tileSize.y))
 	{
-		m_lines[i].position = sf::Vector2f(tileSheetXOffset, k);
-		m_lines[i + 1].position = sf::Vector2f(tileSheetXOffset + m_tileSheet.getSize().x, k);
+		m_lines[i].position = sf::Vector2f(static_cast<float>(tileSheetXOffset), static_cast<float>(k));
+		m_lines[i + 1].position = sf::Vector2f(static_cast<float>(tileSheetXOffset + m_tileSheet.getSize().x), static_cast<float>(k));
 		m_lines[i].color = sf::Color::Red;
 		m_lines[i + 1].color = sf::Color::Red;
 	}
 	//vertical sheet lines
 	for (int i{ bounds[2] }, k{ static_cast<int>(m_tileSize.x) }; i < bounds[3]; i += 2, k += static_cast<int>(m_tileSize.x))
 	{
-		m_lines[i].position = sf::Vector2f(k + tileSheetXOffset, 0);
-		m_lines[i + 1].position = sf::Vector2f(k + tileSheetXOffset, m_tileSheet.getSize().y);
+		m_lines[i].position = sf::Vector2f(static_cast<float>(k + tileSheetXOffset), 0);
+		m_lines[i + 1].position = sf::Vector2f(static_cast<float>(k + tileSheetXOffset), static_cast<float>(m_tileSheet.getSize().y));
 		m_lines[i].color = sf::Color::Red;
 		m_lines[i + 1].color = sf::Color::Red;
 	}
 	//blue Lines
-	m_lines[bounds[3]].position = sf::Vector2f(0, m_background.getSize().y);
-	m_lines[bounds[3] + 1].position = sf::Vector2f(tileSheetXOffset, m_background.getSize().y);
-	m_lines[bounds[3] + 2].position = sf::Vector2f(tileSheetXOffset, 0);
-	m_lines[bounds[3] + 3].position = sf::Vector2f(tileSheetXOffset, m_windowHeight);
-	m_lines[bounds[3] + 4].position = sf::Vector2f(tileSheetXOffset, m_tileSheet.getSize().y);
-	m_lines[bounds[3] + 5].position = sf::Vector2f(tileSheetXOffset + m_tileSheet.getSize().x, m_tileSheet.getSize().y);
+	m_lines[bounds[3]].position = sf::Vector2f(0, static_cast<float>(m_background.getSize().y));
+	m_lines[bounds[3] + 1].position = sf::Vector2f(static_cast<float>(tileSheetXOffset), static_cast<float>(m_background.getSize().y));
+	m_lines[bounds[3] + 2].position = sf::Vector2f(static_cast<float>(tileSheetXOffset), 0);
+	m_lines[bounds[3] + 3].position = sf::Vector2f(static_cast<float>(tileSheetXOffset), static_cast<float>(m_windowHeight));
+	m_lines[bounds[3] + 4].position = sf::Vector2f(static_cast<float>(tileSheetXOffset), static_cast<float>(m_tileSheet.getSize().y));
+	m_lines[bounds[3] + 5].position = sf::Vector2f(static_cast<float>(tileSheetXOffset + m_tileSheet.getSize().x), static_cast<float>(m_tileSheet.getSize().y));
 	for (int i{ bounds[3] }; i < bounds[3] + 6; i++)
 		m_lines[i].color = sf::Color::Blue;
 }
@@ -153,7 +163,7 @@ void MapMaker::createLines()
 void MapMaker::createLetters()
 {
 	sf::Text letter;
-	letter.setFont(m_font);
+	letter.setFont(mainFont);
 	letter.setStyle(sf::Text::Bold);
 	letter.setCharacterSize(14);
 	
@@ -204,6 +214,7 @@ void MapMaker::handleClick(sf::Mouse::Button button, sf::Vector2i &position)
 		if (m_tileSheet.contains(position))
 		{
 			m_selectedTile = m_tileSheet.getTileNumber(position);
+			m_taskWindow->setCurrentTile(m_selectedTile);
 		}
 		else if (m_background.contains(position))
 		{
@@ -282,10 +293,7 @@ void MapMaker::handleKeyPress(sf::Event &eventy)
 {
 	if (eventy.key.code == sf::Keyboard::L)
 	{
-		if (drawLines)
-			drawLines = false;
-		else
-			drawLines = true;
+		m_taskWindow->m_lineToggle.toggle();
 	}
 	if (eventy.key.code == sf::Keyboard::Num2 || eventy.key.code == sf::Keyboard::F)
 	{
@@ -368,3 +376,10 @@ void MapMaker::load(std::string fileName)
 
 	input.close();
 }
+
+MapMaker::~MapMaker()
+{
+	delete m_taskWindow;
+}
+
+sf::Font MapMaker::mainFont;
