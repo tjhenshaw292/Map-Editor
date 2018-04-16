@@ -9,12 +9,16 @@ class ToggleButton : public sf::Drawable, public sf::Transformable
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 	static sf::Color s_onColor;
 	static sf::Color s_offColor;
+	static float s_borderThickness;
 public:
 	ToggleButton(char buttonLetter, sf::Font &font);
 	static sf::Vector2f s_buttonSize;
-	bool buttonIsClicked(sf::Vector2f clickPosition);
+	//Returns true if clicked
+	bool handleClick(sf::Vector2i clickPosition);
 	void toggle();
 	bool isOn();
+	void setScale(sf::Vector2f &scale);
+	void setPosition(float x, float y);
 };
 
 class TileDisplay : public sf::Drawable, public sf::Transformable
@@ -33,16 +37,18 @@ public:
 
 class TaskWindow
 {
-	sf::RenderWindow m_window;
 	static sf::Color s_backGround;
 	TileDisplay m_currentTileDisplay;
 public:
 	TaskWindow(sf::Vector2u size, sf::Texture *tileSet, sf::Vector2u &tileSize, sf::Font &font);
+	sf::Vector2u m_size;
+	sf::RenderWindow m_window;
 	ToggleButton m_BGToggle;
 	ToggleButton m_FGToggle;
 	ToggleButton m_maskToggle;
 	ToggleButton m_lineToggle;
 	ToggleButton m_properties;
+	std::vector<ToggleButton*> m_buttons;
 	void display();
 	void handleClick(sf::Vector2i clickPoint);
 	void setCurrentTile(int tileNumber);

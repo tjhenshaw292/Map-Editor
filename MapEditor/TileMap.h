@@ -28,8 +28,8 @@ public:
 	void sectionTiles(sf::Vector2u &tileSize);
 	bool contains(sf::Vector2f &point);
 	bool contains(sf::Vector2i &point);
-	int getTileNumber(sf::Vector2i &position);
-	int getTileIndex(sf::Vector2i &position);
+	int getTileNumber(sf::Vector2f &position);
+	int getTileIndex(sf::Vector2f &position);
 	sf::Vector2u& getSize();
 	sf::Vector2u& getTileAmount();
 	std::vector<Tile> m_tiles;

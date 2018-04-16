@@ -5,7 +5,7 @@ int main()
 {
 	if (!MapMaker::mainFont.loadFromFile("Carlito-Regular.ttf"))
 		throw;
-	MapMaker makeMe("pokeTiles2.png", sf::Vector2u(16, 16), 240, 160);
+	MapMaker makeMe("pokeTiles2.png", sf::Vector2u(16, 16), 800, 160);
 	//makeMe.load("newArea.dat");
 	makeMe.display();
 	makeMe.save("newArea.dat");

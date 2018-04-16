@@ -38,16 +38,16 @@ void TileMap::reAssign(sf::Vector2u &tileSize)
 			sf::Vertex* quad = &m_vertices[(i + j * m_tileAmount.x) * 4];
 
 			// define its 4 corners
-			quad[0].position = sf::Vector2f(i * tileSize.x, j * tileSize.y);
-			quad[1].position = sf::Vector2f((i + 1) * tileSize.x, j * tileSize.y);
-			quad[2].position = sf::Vector2f((i + 1) * tileSize.x, (j + 1) * tileSize.y);
-			quad[3].position = sf::Vector2f(i * tileSize.x, (j + 1) * tileSize.y);
+			quad[0].position = sf::Vector2f(static_cast<float>(i * tileSize.x), static_cast<float>(j * tileSize.y));
+			quad[1].position = sf::Vector2f(static_cast<float>((i + 1) * tileSize.x), static_cast<float>(j * tileSize.y));
+			quad[2].position = sf::Vector2f(static_cast<float>((i + 1) * tileSize.x), static_cast<float>((j + 1) * tileSize.y));
+			quad[3].position = sf::Vector2f(static_cast<float>(i * tileSize.x), static_cast<float>((j + 1) * tileSize.y));
 
 			// define its 4 texture coordinates
-			quad[0].texCoords = sf::Vector2f(tu * tileSize.x, tv * tileSize.y);
-			quad[1].texCoords = sf::Vector2f((tu + 1) * tileSize.x, tv * tileSize.y);
-			quad[2].texCoords = sf::Vector2f((tu + 1) * tileSize.x, (tv + 1) * tileSize.y);
-			quad[3].texCoords = sf::Vector2f(tu * tileSize.x, (tv + 1) * tileSize.y);
+			quad[0].texCoords = sf::Vector2f(static_cast<float>(tu * tileSize.x), static_cast<float>(tv * tileSize.y));
+			quad[1].texCoords = sf::Vector2f(static_cast<float>((tu + 1) * tileSize.x), static_cast<float>(tv * tileSize.y));
+			quad[2].texCoords = sf::Vector2f(static_cast<float>((tu + 1) * tileSize.x), static_cast<float>((tv + 1) * tileSize.y));
+			quad[3].texCoords = sf::Vector2f(static_cast<float>(tu * tileSize.x), static_cast<float>((tv + 1) * tileSize.y));
 		}
 
 }
@@ -56,34 +56,36 @@ void TileMap::sectionTiles(sf::Vector2u &tileSize)
 {
 	m_mapRect.top = this->getPosition().y;
 	m_mapRect.left = this->getPosition().x;
-	m_mapRect.width = m_size.x;
-	m_mapRect.height = m_size.y;
+	m_mapRect.width = static_cast<float>(m_size.x);
+	m_mapRect.height = static_cast<float>(m_size.y);
 	for (unsigned int i = 0; i < m_tileAmount.x; ++i)
 		for (unsigned int j = 0; j < m_tileAmount.y; ++j)
 		{
-			m_tiles[i + j * m_tileAmount.x].tileRect.top = j * tileSize.y;
-			m_tiles[i + j * m_tileAmount.x].tileRect.left = i * tileSize.x + m_mapRect.left;
-			m_tiles[i + j * m_tileAmount.x].tileRect.width = tileSize.x;
-			m_tiles[i + j * m_tileAmount.x].tileRect.height = tileSize.y;
+			m_tiles[i + j * m_tileAmount.x].tileRect.top = static_cast<float>(j * tileSize.y);
+			m_tiles[i + j * m_tileAmount.x].tileRect.left = static_cast<float>(i * tileSize.x + m_mapRect.left);
+			m_tiles[i + j * m_tileAmount.x].tileRect.width = static_cast<float>(tileSize.x);
+			m_tiles[i + j * m_tileAmount.x].tileRect.height = static_cast<float>(tileSize.y);
 		}
 }
 
-int TileMap::getTileNumber(sf::Vector2i &position)
+int TileMap::getTileNumber(sf::Vector2f &position)
 {
 	for (auto &element : m_tiles)
 	{
-		if (element.tileRect.contains(static_cast<sf::Vector2f>(position)))
+		if (element.tileRect.contains(position))
 			return element.tileNumber;
 	}
+	return 0;
 }
 
-int TileMap::getTileIndex(sf::Vector2i &position)
+int TileMap::getTileIndex(sf::Vector2f &position)
 {
-	for (int i{ 0 }; i < m_tiles.size(); i++)
+	for (int i{ 0 }; i < static_cast<int>(m_tiles.size()); i++)
 	{
-		if (m_tiles[i].tileRect.contains(static_cast<sf::Vector2f>(position)))
+		if (m_tiles[i].tileRect.contains(position))
 			return i;
 	}
+	return 0;
 }
 
 bool TileMap::contains(sf::Vector2f &point)

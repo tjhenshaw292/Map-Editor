@@ -11,8 +11,8 @@ ToggleButton::ToggleButton(char buttonLetter, sf::Font &font) :
 {
 	//Button Rect
 	m_buttonShape.setFillColor(s_onColor);
-	m_buttonShape.setOutlineColor(sf::Color::Black);
-	m_buttonShape.setOutlineThickness(s_buttonSize.y / 20);
+	m_buttonShape.setOutlineColor(sf::Color::Red);
+	m_buttonShape.setOutlineThickness(s_buttonSize.y * s_borderThickness);
 
 	//Button Letter
 	m_buttonLetter.setFillColor(sf::Color::Black);
@@ -29,9 +29,9 @@ void ToggleButton::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	target.draw(m_buttonLetter, states);
 }
 
-bool ToggleButton::buttonIsClicked(sf::Vector2f clickPosition)
+bool ToggleButton::handleClick(sf::Vector2i clickPosition)
 {
-	if (m_clickRect.contains(clickPosition))
+	if (m_clickRect.contains(sf::Vector2f(static_cast<float>(clickPosition.x), static_cast<float>(clickPosition.y))))
 	{
 		toggle();
 		return true;
@@ -44,14 +44,40 @@ void ToggleButton::toggle()
 {
 	m_turnedOn = m_turnedOn ? false : true;
 	if (m_turnedOn)
+	{
 		m_buttonShape.setFillColor(s_onColor);
+		m_buttonShape.setOutlineThickness(s_buttonSize.y * s_borderThickness);
+	}
 	else
+	{
 		m_buttonShape.setFillColor(s_offColor);
+		m_buttonShape.setOutlineThickness(0);
+	}
 }
 
 bool ToggleButton::isOn()
 {
 	return m_turnedOn;
+}
+
+void ToggleButton::setScale(sf::Vector2f &scale)
+{
+	//Set Object Scale
+	this->sf::Transformable::setScale(scale);
+
+	//Set float rect scale
+	m_clickRect.width = s_buttonSize.x * scale.x;
+	m_clickRect.height = s_buttonSize.y * scale.y;
+}
+
+void ToggleButton::setPosition(float x, float y)
+{
+	//Set Object Position
+	this->sf::Transformable::setPosition(x, y);
+
+	//Set float rect Position
+	m_clickRect.left = x;
+	m_clickRect.top = y;
 }
 
 TileDisplay::TileDisplay(sf::Texture *tileMap, sf::Vector2u &tileSize) :
@@ -99,6 +125,7 @@ void TileDisplay::draw(sf::RenderTarget& target, sf::RenderStates states) const
 }
 
 TaskWindow::TaskWindow(sf::Vector2u size, sf::Texture *tileSet, sf::Vector2u &tileSize, sf::Font &font) :
+	m_size{ size },
 	m_currentTileDisplay{ tileSet, tileSize },
 	m_BGToggle{ 'B', font },
 	m_FGToggle{ 'F', font },
@@ -115,12 +142,16 @@ TaskWindow::TaskWindow(sf::Vector2u size, sf::Texture *tileSet, sf::Vector2u &ti
 	sf::Vector2f offset{ (allotedButtonSpace.x - buttonSize.x) / 2, (allotedButtonSpace.y - buttonSize.y) / 2 };
 	sf::Vector2f buttonScale{ buttonSize.x / ToggleButton::s_buttonSize.x, buttonSize.y / ToggleButton::s_buttonSize.y };
 
-	std::vector<ToggleButton*> buttons{ &m_BGToggle, &m_FGToggle, &m_maskToggle, &m_lineToggle, &m_properties };
+	m_buttons.push_back(&m_BGToggle);
+	m_buttons.push_back(&m_FGToggle);
+	m_buttons.push_back(&m_maskToggle);
+	m_buttons.push_back(&m_lineToggle);
+	m_buttons.push_back(&m_properties);
 
 	for (int i{ 0 }; i < 5; i++)
 	{
-		buttons[i]->setScale(buttonScale);
-		buttons[i]->setPosition(i * allotedButtonSpace.x + offset.x, TileDisplay::s_displaySize.y + offset.y);
+		m_buttons[i]->ToggleButton::setScale(buttonScale);
+		m_buttons[i]->ToggleButton::setPosition(i * allotedButtonSpace.x + offset.x, TileDisplay::s_displaySize.y + offset.y);
 	}
 }
 
@@ -136,6 +167,16 @@ void TaskWindow::display()
 	m_window.display();
 }
 
+void TaskWindow::handleClick(sf::Vector2i clickPoint)
+{
+	for (auto &element : m_buttons)
+	{
+		//if clicked exit for loop early
+		if (element->handleClick(clickPoint))
+			return;
+	}
+}
+
 void TaskWindow::setCurrentTile(int tileNumber)
 {
 	m_currentTileDisplay.setTile(tileNumber);
@@ -143,6 +184,7 @@ void TaskWindow::setCurrentTile(int tileNumber)
 
 sf::Color ToggleButton::s_onColor{ 116, 116, 116 };
 sf::Color ToggleButton::s_offColor{ 202, 202, 202 };
+float ToggleButton::s_borderThickness{ 0.07f };
 sf::Vector2f ToggleButton::s_buttonSize{ 100, 100 };
 sf::Vector2f TileDisplay::s_displaySize{ 200, 200 };
 float TileDisplay::s_outlineThickness{ 5.0f };
