@@ -16,6 +16,7 @@ ToggleButton::ToggleButton(char buttonLetter, sf::Font &font) :
 
 	//Button Letter
 	m_buttonLetter.setFillColor(sf::Color::Black);
+	m_buttonLetter.setPosition(s_buttonSize.x * 0.13f, -s_buttonSize.y * 0.18f);
 }
 
 void ToggleButton::draw(sf::RenderTarget& target, sf::RenderStates states) const
@@ -110,7 +111,7 @@ TaskWindow::TaskWindow(sf::Vector2u size, sf::Texture *tileSet, sf::Vector2u &ti
 
 	//Math
 	sf::Vector2f allotedButtonSpace{ static_cast<float>(size.x) / 5, static_cast<float>(size.y) - TileDisplay::s_displaySize.y };
-	sf::Vector2f buttonSize{ allotedButtonSpace.x * (5.0f / 6.0f), allotedButtonSpace.y * (5.0f / 6.0f) };
+	sf::Vector2f buttonSize{ allotedButtonSpace.x * (5.0f / 6.0f), allotedButtonSpace.y * (3.0f / 6.0f) };
 	sf::Vector2f offset{ (allotedButtonSpace.x - buttonSize.x) / 2, (allotedButtonSpace.y - buttonSize.y) / 2 };
 	sf::Vector2f buttonScale{ buttonSize.x / ToggleButton::s_buttonSize.x, buttonSize.y / ToggleButton::s_buttonSize.y };
 
