@@ -4,6 +4,8 @@
 class TaskWindow;
 //maybe show selected tile
 
+sf::Clock MasterClock;
+
 enum Direction
 {
 	UP, DOWN, LEFT, RIGHT
@@ -13,11 +15,13 @@ class MovableScreen
 {
 	sf::View m_view;
 	sf::Vector2u m_size;
+	static float s_screenSpeed;
 public:
 	MovableScreen(sf::Vector2u &screenSize);
 	void assignTileMap(TileMap &map);
 	bool canMove(Direction);
 	void move(Direction, float distance);
+	void move(Direction);
 	void zoom(float amount);
 	const sf::View& getView();
 	void setViewport(sf::FloatRect &port);

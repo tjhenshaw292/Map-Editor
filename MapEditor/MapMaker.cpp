@@ -288,7 +288,7 @@ void MapMaker::setProperty(sf::Text &letter, TileMap::TileProperty prop)
 		letter.setFillColor(sf::Color::Red);
 		break;
 	case TileMap::NOTHING:
-		letter.setString('\0');
+		letter.setString(' ');
 		break;
 	case TileMap::ACTION:
 		letter.setString('A');
@@ -413,6 +413,12 @@ void MapMaker::handleKeyHold(sf::Keyboard::Key key, sf::Vector2i &position)
 			setProperty(m_letters[m_background.getTileIndex(actualPosition)], TileMap::DOOR);
 		}
 		break;
+	case sf::Keyboard::Up:
+		m_mapScreen.move(UP);
+		break;
+	case sf::Keyboard::Down:
+		m_mapScreen.move(DOWN);
+		break;
 	}
 	std::cout << m_background.getTileIndex(actualPosition) << std::endl;
 }
@@ -452,7 +458,7 @@ void MapMaker::handleKeyPress(sf::Event &eventy)
 		m_taskWindow->m_properties.toggle();
 		break;
 		//Map and Tile Screen Movement
-	case sf::Keyboard::Up:
+	/*case sf::Keyboard::Up:
 		if (sf::Mouse::getPosition(m_window).x < static_cast<int>(s_maxWindowSize.x) / 2)
 			m_mapScreen.move(UP, 30.0f);
 		else
@@ -463,7 +469,7 @@ void MapMaker::handleKeyPress(sf::Event &eventy)
 			m_mapScreen.move(DOWN, 30.0f);
 		else
 			m_tileScreen.move(DOWN, 30.0f);
-		break;
+		break;*/
 	case sf::Keyboard::Left:
 		if (sf::Mouse::getPosition(m_window).x < static_cast<int>(s_maxWindowSize.x) / 2)
 			m_mapScreen.move(LEFT, 30.0f);
@@ -578,6 +584,27 @@ bool MovableScreen::canMove(Direction moving)
 	return true;
 }
 
+void MovableScreen::move(Direction moving)
+{
+	switch (moving)
+	{
+	case UP:
+		m_view.move(0, -amount);
+		break;
+	case DOWN:
+		m_view.move(0, amount);
+		break;
+	case LEFT:
+		m_view.move(-amount, 0);
+		break;
+	case RIGHT:
+		m_view.move(amount, 0);
+		break;
+	default:
+		throw; //wrong input
+	}
+}
+
 void MovableScreen::move(Direction moving, float amount)
 {
 	switch (moving)
@@ -616,3 +643,4 @@ void MovableScreen::setViewport(sf::FloatRect &port)
 
 sf::Font MapMaker::mainFont;
 sf::Vector2u MapMaker::s_maxWindowSize{ 1300, 900 }; //gotta be 2:1 aspect ratio
+float MovableScreen::s_screenSpeed{ 30.0f };
