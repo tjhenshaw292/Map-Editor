@@ -6,18 +6,19 @@ class TaskWindow;
 
 enum Direction
 {
-	UP, DOWN, LEFT, RIGHT, IN, OUT
+	UP, DOWN, LEFT, RIGHT
 };
 
 class MovableScreen
 {
 	sf::View m_view;
+	sf::Vector2u m_size;
 public:
-	MovableScreen();
+	MovableScreen(sf::Vector2u &screenSize);
 	void assignTileMap(TileMap &map);
 	bool canMove(Direction);
 	void move(Direction, float distance);
-	void zoom(Direction, float amount);
+	void zoom(float amount);
 	const sf::View& getView();
 	void setViewport(sf::FloatRect &port);
 };
@@ -50,6 +51,7 @@ class MapMaker
 	void handleClick(sf::Mouse::Button button, sf::Vector2i &position);
 	void handleKeyPress(sf::Event &eventy);
 	void handleKeyHold(sf::Keyboard::Key key, sf::Vector2i &position);
+	void handleMouseScroll(sf::Event &eventy);
 	void setProperty(sf::Text &letter, TileMap::TileProperty prop);
 
 	static sf::Vector2u s_maxWindowSize;

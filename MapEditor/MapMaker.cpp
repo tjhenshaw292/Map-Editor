@@ -5,7 +5,9 @@
 MapMaker::MapMaker(std::string tileSetName, sf::Vector2u tileSize, unsigned int mapWidth, unsigned int mapHeight): 
 	m_tileSetName{ tileSetName }, 
 	m_tileSize{ tileSize }, 
-	m_selectedTile{ 0 }
+	m_selectedTile{ 0 },
+	m_mapScreen{ sf::Vector2u(s_maxWindowSize.x / 2, s_maxWindowSize.y) },
+	m_tileScreen{ sf::Vector2u(s_maxWindowSize.x / 2, s_maxWindowSize.y) }
 {
 	if (!m_tileSet.loadFromFile(m_tileSetName))
 		throw;
@@ -100,10 +102,10 @@ void MapMaker::display()
 	m_taskWindow = new TaskWindow{ taskWindowSize, &m_tileSet, m_tileSize, mainFont };
 	m_taskWindow->setCurrentTile(m_selectedTile);
 	m_taskWindow->m_window.setKeyRepeatEnabled(false);
-	m_taskWindow->m_window.setPosition(sf::Vector2i{ 20, 100 });
+	m_taskWindow->m_window.setPosition(sf::Vector2i{ 20, 73 });
 
 	//Move Window
-	m_window.setPosition(sf::Vector2i{ static_cast<int>(taskWindowSize.x) + 40, 100 });
+	m_window.setPosition(sf::Vector2i{ static_cast<int>(taskWindowSize.x) + 40, 73 });
 	
 	sf::Event eventy;
 
@@ -114,6 +116,8 @@ void MapMaker::display()
 		{
 			if (eventy.type == sf::Event::KeyPressed)
 				handleKeyPress(eventy);
+			if (eventy.type == sf::Event::MouseWheelScrolled)
+				handleMouseScroll(eventy);
 			if (eventy.type == sf::Event::Resized)
 				m_window.setSize(sf::Vector2u(windowWidth, m_windowHeight));
 			if (eventy.type == sf::Event::Closed)
@@ -413,27 +417,65 @@ void MapMaker::handleKeyHold(sf::Keyboard::Key key, sf::Vector2i &position)
 	std::cout << m_background.getTileIndex(actualPosition) << std::endl;
 }
 
+void MapMaker::handleMouseScroll(sf::Event &eventy)
+{
+	if (eventy.mouseWheelScroll.x < static_cast<int>(s_maxWindowSize.x) / 2)
+	{
+		m_mapScreen.zoom(eventy.mouseWheelScroll.delta * 0.1f);
+	}
+	else
+	{
+		m_tileScreen.zoom(eventy.mouseWheelScroll.delta * 0.1f);
+	}
+}
+
 void MapMaker::handleKeyPress(sf::Event &eventy)
 {
-	if (eventy.key.code == sf::Keyboard::L)
+	switch (eventy.key.code)
 	{
+	case sf::Keyboard::L:
 		m_taskWindow->m_lineToggle.toggle();
-	}
-	if (eventy.key.code == sf::Keyboard::Num2 || eventy.key.code == sf::Keyboard::F)
-	{
-		m_taskWindow->m_FGToggle.toggle();
-	}
-	if (eventy.key.code == sf::Keyboard::Num1 || eventy.key.code == sf::Keyboard::G)
-	{
+		break;
+	case sf::Keyboard::Num1:
+	case sf::Keyboard::G:
 		m_taskWindow->m_BGToggle.toggle();
-	}
-	if (eventy.key.code == sf::Keyboard::Num3 || eventy.key.code == sf::Keyboard::M)
-	{
+		break;
+	case sf::Keyboard::Num2:
+	case sf::Keyboard::F:
+		m_taskWindow->m_FGToggle.toggle();
+		break;
+	case sf::Keyboard::Num3:
+	case sf::Keyboard::M:
 		m_taskWindow->m_maskToggle.toggle();
-	}
-	if (eventy.key.code == sf::Keyboard::P)
-	{
+		break;
+	case sf::Keyboard::P:
 		m_taskWindow->m_properties.toggle();
+		break;
+		//Map and Tile Screen Movement
+	case sf::Keyboard::Up:
+		if (sf::Mouse::getPosition(m_window).x < static_cast<int>(s_maxWindowSize.x) / 2)
+			m_mapScreen.move(UP, 30.0f);
+		else
+			m_tileScreen.move(UP, 30.0f);
+		break;
+	case sf::Keyboard::Down:
+		if (sf::Mouse::getPosition(m_window).x < static_cast<int>(s_maxWindowSize.x) / 2)
+			m_mapScreen.move(DOWN, 30.0f);
+		else
+			m_tileScreen.move(DOWN, 30.0f);
+		break;
+	case sf::Keyboard::Left:
+		if (sf::Mouse::getPosition(m_window).x < static_cast<int>(s_maxWindowSize.x) / 2)
+			m_mapScreen.move(LEFT, 30.0f);
+		else
+			m_tileScreen.move(LEFT, 30.0f);
+		break;
+	case sf::Keyboard::Right:
+		if (sf::Mouse::getPosition(m_window).x < static_cast<int>(s_maxWindowSize.x) / 2)
+			m_mapScreen.move(RIGHT, 30.0f);
+		else
+			m_tileScreen.move(RIGHT, 30.0f);
+		break;
 	}
 }
 
@@ -494,20 +536,72 @@ MapMaker::~MapMaker()
 	delete m_taskWindow;
 }
 
-MovableScreen::MovableScreen()
+MovableScreen::MovableScreen(sf::Vector2u &screenSize) :
+	m_size{ screenSize }
 {
 
 }
 
 void MovableScreen::assignTileMap(TileMap &map)
 {
-	float xSize{ static_cast<float>(map.getSize().x) };
-	float ySize{ static_cast<float>(map.getSize().y) };
-	float largerSize;
-	largerSize = xSize >= ySize ? xSize : ySize;
+	sf::Vector2f mapSize{ static_cast<float>(map.getSize().x), static_cast<float>(map.getSize().y) };
+	sf::Vector2f screenSize{ static_cast<float>(m_size.x), static_cast<float>(m_size.y) };
 
-	m_view.setSize(largerSize, largerSize);
-	m_view.setCenter(largerSize / 2.0f + map.getPosition().x, largerSize / 2.0f + map.getPosition().y);
+	sf::Vector2f aspectRatio{ screenSize.y / screenSize.x, screenSize.x / screenSize.y };
+
+	if (mapSize.x * aspectRatio.x >= mapSize.y * aspectRatio.y)
+	{
+		m_view.setSize(mapSize.x, mapSize.x * aspectRatio.x);
+		m_view.setCenter(mapSize.x / 2.0f + map.getPosition().x, mapSize.x * aspectRatio.x / 2.0f + map.getPosition().y);
+	}
+	else
+	{
+		m_view.setSize(mapSize.y * aspectRatio.y, mapSize.y);
+		m_view.setCenter(mapSize.y * aspectRatio.y / 2.0f + map.getPosition().x, mapSize.y / 2.0f + map.getPosition().y);
+	}
+}
+
+bool MovableScreen::canMove(Direction moving)
+{
+	switch (moving)
+	{
+	case UP:
+		//if (m_view.getCenter)
+		break;
+	case DOWN:
+		break;
+	case LEFT:
+		break;
+	case RIGHT:
+		break;
+	}
+	return true;
+}
+
+void MovableScreen::move(Direction moving, float amount)
+{
+	switch (moving)
+	{
+	case UP:
+		m_view.move(0, -amount);
+		break;
+	case DOWN:
+		m_view.move(0, amount);
+		break;
+	case LEFT:
+		m_view.move(-amount, 0);
+		break;
+	case RIGHT:
+		m_view.move(amount, 0);
+		break;
+	default:
+		throw; //wrong input
+	}
+}
+
+void MovableScreen::zoom(float amount)
+{
+	m_view.zoom(1 - amount);
 }
 
 const sf::View& MovableScreen::getView()
@@ -521,4 +615,4 @@ void MovableScreen::setViewport(sf::FloatRect &port)
 }
 
 sf::Font MapMaker::mainFont;
-sf::Vector2u MapMaker::s_maxWindowSize{ 1300, 650 }; //gotta be 2:1 aspect ratio
+sf::Vector2u MapMaker::s_maxWindowSize{ 1300, 900 }; //gotta be 2:1 aspect ratio
