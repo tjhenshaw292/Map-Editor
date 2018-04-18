@@ -2,7 +2,7 @@
 #include "MapMaker.h"
 #include "TaskBar.h"
 
-MapMaker::MapMaker(std::string tileSetName, sf::Vector2u tileSize, unsigned int mapWidth, unsigned int mapHeight): 
+MapMaker::MapMaker(std::string tileSetName, sf::Vector2u tileSize, unsigned int xTiles, unsigned int yTiles):
 	m_tileSetName{ tileSetName }, 
 	m_tileSize{ tileSize }, 
 	m_selectedTile{ 0 },
@@ -13,18 +13,13 @@ MapMaker::MapMaker(std::string tileSetName, sf::Vector2u tileSize, unsigned int 
 		throw;
 
 	//initialize tile objects
-	m_background.create(&m_tileSet, sf::Vector2u(mapWidth, mapHeight), m_tileSize);
-	m_foreground.create(&m_tileSet, sf::Vector2u(mapWidth, mapHeight), m_tileSize);
-	m_mask.create(&m_tileSet, sf::Vector2u(mapWidth, mapHeight), m_tileSize);
+	m_background.create(&m_tileSet, sf::Vector2u(xTiles * tileSize.x, yTiles * tileSize.y), m_tileSize);
+	m_foreground.create(&m_tileSet, sf::Vector2u(xTiles * tileSize.x, yTiles * tileSize.y), m_tileSize);
+	m_mask.create(&m_tileSet, sf::Vector2u(xTiles * tileSize.x, yTiles * tileSize.y), m_tileSize);
 	m_tileSheet.create(&m_tileSet, m_tileSet.getSize(), m_tileSize);
 
 	for (unsigned int i{ 0 }; i < m_tileSheet.m_tiles.size(); ++i)
 		m_tileSheet.m_tiles[i].tileNumber = i;
-
-	for (auto &element : m_foreground.m_tiles)
-		element.tileNumber = 550;
-	for (auto &element : m_mask.m_tiles)
-		element.tileNumber = 550;
 
 	m_background.reAssign(m_tileSize);
 	m_foreground.reAssign(m_tileSize);
@@ -40,11 +35,28 @@ MapMaker::MapMaker(std::string tileSetName, sf::Vector2u tileSize, unsigned int 
 	createLetters();
 }
 
+void MapMaker::setBlankTile(int tileNumber)
+{
+	for (auto &element :  m_background.m_tiles)
+		element.tileNumber = tileNumber;
+	for (auto &element : m_foreground.m_tiles)
+		element.tileNumber = tileNumber;
+	for (auto &element : m_mask.m_tiles)
+		element.tileNumber = tileNumber;
+
+	m_background.reAssign(m_tileSize);
+	m_foreground.reAssign(m_tileSize);
+	m_mask.reAssign(m_tileSize);
+}
+
+void MapMaker::setMapFileName(std::string name)
+{
+	m_mapName = name;
+}
+
 void MapMaker::display()
 {
 	unsigned int windowWidth{ m_background.getSize().x + m_tileSheet.getSize().x };
-
-	
 
 	sf::Vector2f mapRatioToTileset;
 
@@ -107,7 +119,9 @@ void MapMaker::display()
 	//Move Window
 	m_window.setPosition(sf::Vector2i{ static_cast<int>(taskWindowSize.x) + 40, 73 });
 	
+	//Pre Loopers
 	sf::Event eventy;
+	m_clock.restart();
 
 	while (m_window.isOpen())
 	{
@@ -145,6 +159,7 @@ void MapMaker::display()
 				handleKeyHold(sf::Keyboard::N, sf::Mouse::getPosition(m_window));
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
 				handleKeyHold(sf::Keyboard::D, sf::Mouse::getPosition(m_window));
+			handleMovementKeys(sf::Mouse::getPosition(m_window).x);
 		}
 
 		//Task Window Event Loop
@@ -163,6 +178,12 @@ void MapMaker::display()
 			m_window.requestFocus();
 		}
 		
+		//Update Screens
+		updateScreens(m_clock.restart());
+
+		//Update Tile Hovered by Mouse
+		updateMouseTile();
+
 		//Draw Loop
 		m_window.clear(sf::Color::Black);
 
@@ -193,6 +214,18 @@ void MapMaker::display()
 		//Display Windows
 		m_window.display();
 		m_taskWindow->display();
+
+		//Handle Save Load
+		if (m_taskWindow->m_save.isOn())
+		{
+			save(m_mapName);
+			m_taskWindow->m_save.toggle();
+		}
+		if (m_taskWindow->m_load.isOn())
+		{
+			load(m_mapName);
+			m_taskWindow->m_load.toggle();
+		}
 	}
 }
 
@@ -310,6 +343,41 @@ void MapMaker::setProperty(sf::Text &letter, TileMap::TileProperty prop)
 	letter.setOrigin(sf::Vector2f(letter.getGlobalBounds().width / 2, letter.getGlobalBounds().height / 2));
 }
 
+void MapMaker::updateScreens(sf::Time elapsed)
+{
+	//Get Seconds
+	float seconds{ elapsed.asSeconds() };
+
+	//Get Displacement
+	sf::Vector2f mapSpeed{ m_mapScreen.getRelativeSpeed() };
+	sf::Vector2f mapDisplacement{ mapSpeed.x * seconds, mapSpeed.y * seconds };
+
+	sf::Vector2f tileSpeed{ m_tileScreen.getRelativeSpeed() };
+	sf::Vector2f tileDisplacement{ tileSpeed.x * seconds, tileSpeed.y * seconds };
+
+	//Move Screens
+	m_mapScreen.move(mapDisplacement);
+	m_tileScreen.move(tileDisplacement);
+}
+
+void MapMaker::updateMouseTile()
+{
+	sf::Vector2i position{ sf::Mouse::getPosition(m_window) };
+
+	if (position.x < static_cast<int>(s_maxWindowSize.x) / 2)
+	{
+		m_window.setView(m_mapScreen.getView());
+		sf::Vector2f actualPosition{ m_window.mapPixelToCoords(position) };
+		m_taskWindow->setMouseTile(m_background.getTileIndex(actualPosition));
+	}
+	else
+	{
+		m_window.setView(m_tileScreen.getView());
+		sf::Vector2f actualPosition{ m_window.mapPixelToCoords(position) };
+		m_taskWindow->setMouseTile(m_tileSheet.getTileIndex(actualPosition));
+	}
+}
+
 void MapMaker::handleClick(sf::Mouse::Button button, sf::Vector2i &position)
 {
 	bool onMap;
@@ -413,14 +481,55 @@ void MapMaker::handleKeyHold(sf::Keyboard::Key key, sf::Vector2i &position)
 			setProperty(m_letters[m_background.getTileIndex(actualPosition)], TileMap::DOOR);
 		}
 		break;
-	case sf::Keyboard::Up:
-		m_mapScreen.move(UP);
-		break;
-	case sf::Keyboard::Down:
-		m_mapScreen.move(DOWN);
-		break;
 	}
 	std::cout << m_background.getTileIndex(actualPosition) << std::endl;
+}
+
+void MapMaker::handleMovementKeys(int xMousePosition)
+{
+	//Screen Movements
+
+	//Get Screen That Mouse Is On, stop other screen
+	MovableScreen* screenTarget;
+	if (xMousePosition < static_cast<int>(s_maxWindowSize.x) / 2)
+	{
+		screenTarget = &m_mapScreen;
+		m_tileScreen.setSpeed(0.0f, 0.0f);
+	}
+	else
+	{
+		screenTarget = &m_tileScreen;
+		m_mapScreen.setSpeed(0.0f, 0.0f);
+	}
+
+	sf::Vector2f speedVector{ 0, 0 };
+
+	//If Holding Up and NOT Down
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+		speedVector.y = -s_screenSpeed;
+
+	//If Holding Down and NOT Up
+	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+		speedVector.y = s_screenSpeed;
+
+	//If Holding Up AND Down OR Neither
+	else
+		speedVector.y = 0.0f;
+
+	//If Holding Left and NOT Right
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+		speedVector.x = -s_screenSpeed;
+
+	//If Holding Right and NOT Left
+	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+		speedVector.x = s_screenSpeed;
+
+	//If Holding Left AND Right OR Neither
+	else
+		speedVector.x = 0.0f;
+
+	//Set Speed
+	screenTarget->setSpeed(speedVector.x, speedVector.y);
 }
 
 void MapMaker::handleMouseScroll(sf::Event &eventy)
@@ -469,7 +578,7 @@ void MapMaker::handleKeyPress(sf::Event &eventy)
 			m_mapScreen.move(DOWN, 30.0f);
 		else
 			m_tileScreen.move(DOWN, 30.0f);
-		break;*/
+		break;
 	case sf::Keyboard::Left:
 		if (sf::Mouse::getPosition(m_window).x < static_cast<int>(s_maxWindowSize.x) / 2)
 			m_mapScreen.move(LEFT, 30.0f);
@@ -481,7 +590,7 @@ void MapMaker::handleKeyPress(sf::Event &eventy)
 			m_mapScreen.move(RIGHT, 30.0f);
 		else
 			m_tileScreen.move(RIGHT, 30.0f);
-		break;
+		break;*/
 	}
 }
 
@@ -584,27 +693,6 @@ bool MovableScreen::canMove(Direction moving)
 	return true;
 }
 
-void MovableScreen::move(Direction moving)
-{
-	switch (moving)
-	{
-	case UP:
-		m_view.move(0, -amount);
-		break;
-	case DOWN:
-		m_view.move(0, amount);
-		break;
-	case LEFT:
-		m_view.move(-amount, 0);
-		break;
-	case RIGHT:
-		m_view.move(amount, 0);
-		break;
-	default:
-		throw; //wrong input
-	}
-}
-
 void MovableScreen::move(Direction moving, float amount)
 {
 	switch (moving)
@@ -626,6 +714,11 @@ void MovableScreen::move(Direction moving, float amount)
 	}
 }
 
+void MovableScreen::move(sf::Vector2f &distance)
+{
+	m_view.move(distance);
+}
+
 void MovableScreen::zoom(float amount)
 {
 	m_view.zoom(1 - amount);
@@ -641,6 +734,30 @@ void MovableScreen::setViewport(sf::FloatRect &port)
 	m_view.setViewport(port);
 }
 
+sf::Vector2f MovableScreen::getPixelRatio()
+{
+	sf::Vector2f currentSize{ m_view.getSize() };
+	sf::Vector2f screenSize{ static_cast<float>(m_size.x), static_cast<float>(m_size.y) };
+	return sf::Vector2f{ currentSize.x / screenSize.x, currentSize.y / screenSize.y };
+}
+
+void MovableScreen::setSpeed(float x, float y)
+{
+	m_speed.x = x;
+	m_speed.y = y;
+}
+
+const sf::Vector2f& MovableScreen::getSpeed()
+{
+	return m_speed;
+}
+
+sf::Vector2f MovableScreen::getRelativeSpeed()
+{
+	sf::Vector2f pixelRatio{ this->getPixelRatio() };
+	return sf::Vector2f{ m_speed.x * pixelRatio.x, m_speed.y * pixelRatio.y };
+}
+
 sf::Font MapMaker::mainFont;
 sf::Vector2u MapMaker::s_maxWindowSize{ 1300, 900 }; //gotta be 2:1 aspect ratio
-float MovableScreen::s_screenSpeed{ 30.0f };
+float MapMaker::s_screenSpeed{ 240.0f }; //pixels per second

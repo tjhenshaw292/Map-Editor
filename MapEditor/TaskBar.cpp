@@ -131,13 +131,15 @@ TaskWindow::TaskWindow(sf::Vector2u size, sf::Texture *tileSet, sf::Vector2u &ti
 	m_FGToggle{ 'F', font },
 	m_maskToggle{ 'M', font },
 	m_lineToggle{ 'L', font },
-	m_properties{ 'P', font }
+	m_properties{ 'P', font },
+	m_save{ 'S', font },
+	m_load{ 'O', font }
 {
 	m_window.create(sf::VideoMode(size.x, size.y), "TaskWindow");
 	m_currentTileDisplay.setPosition(0, 0);
 
-	//Math
-	sf::Vector2f allotedButtonSpace{ static_cast<float>(size.x) / 5, static_cast<float>(size.y) - TileDisplay::s_displaySize.y };
+	//Math for Toggle Buttons
+	sf::Vector2f allotedButtonSpace{ static_cast<float>(size.x) / 5, static_cast<float>(size.y) - TileDisplay::s_displaySize.y }; //per button 5 atm
 	sf::Vector2f buttonSize{ allotedButtonSpace.x * (5.0f / 6.0f), allotedButtonSpace.y * (3.0f / 6.0f) };
 	sf::Vector2f offset{ (allotedButtonSpace.x - buttonSize.x) / 2, (allotedButtonSpace.y - buttonSize.y) / 2 };
 	sf::Vector2f buttonScale{ buttonSize.x / ToggleButton::s_buttonSize.x, buttonSize.y / ToggleButton::s_buttonSize.y };
@@ -153,17 +155,46 @@ TaskWindow::TaskWindow(sf::Vector2u size, sf::Texture *tileSet, sf::Vector2u &ti
 		m_buttons[i]->ToggleButton::setScale(buttonScale);
 		m_buttons[i]->ToggleButton::setPosition(i * allotedButtonSpace.x + offset.x, TileDisplay::s_displaySize.y + offset.y);
 	}
+
+	//Save and Load Buttons
+	/*allotedButtonSpace.x = (static_cast<float>(size.x) - TileDisplay::s_displaySize.x) / 2;
+	buttonSize.x = allotedButtonSpace.x * (5.0f / 6.0f);
+	offset.x = (allotedButtonSpace.x - buttonSize.x) / 2;*/
+
+	m_save.ToggleButton::setScale(buttonScale);
+	m_save.ToggleButton::setPosition(TileDisplay::s_displaySize.x + offset.x, offset.x);
+	m_load.ToggleButton::setScale(buttonScale);
+	m_load.ToggleButton::setPosition(TileDisplay::s_displaySize.x + offset.x, offset.x * 2 + buttonSize.y);
+
+	//Turn Off load save buttons
+	while (m_save.isOn())
+		m_save.toggle();
+	while (m_load.isOn())
+		m_load.toggle();
+
+	//Add to Buttons
+	m_buttons.push_back(&m_save);
+	m_buttons.push_back(&m_load);
+
+	//Mouse Tile Text
+	m_tileOnMouse.setFont(font);
+	m_tileOnMouse.setFillColor(sf::Color::Black);
+	m_tileOnMouse.setCharacterSize(32);
+	m_tileOnMouse.setPosition(TileDisplay::s_displaySize.x, TileDisplay::s_displaySize.y * 0.83f);
 }
 
 void TaskWindow::display()
 {
 	m_window.clear(s_backGround);
-	m_window.draw(m_BGToggle);
+	for (auto &button : m_buttons)
+		m_window.draw(*button);
+	/*m_window.draw(m_BGToggle);
 	m_window.draw(m_FGToggle);
 	m_window.draw(m_maskToggle);
 	m_window.draw(m_lineToggle);
-	m_window.draw(m_properties);
+	m_window.draw(m_properties);*/
 	m_window.draw(m_currentTileDisplay);
+	m_window.draw(m_tileOnMouse);
 	m_window.display();
 }
 
@@ -180,6 +211,14 @@ void TaskWindow::handleClick(sf::Vector2i clickPoint)
 void TaskWindow::setCurrentTile(int tileNumber)
 {
 	m_currentTileDisplay.setTile(tileNumber);
+}
+
+void TaskWindow::setMouseTile(int tileNumber)
+{
+	if (tileNumber >= 0) //if on a tile
+		m_tileOnMouse.setString(std::to_string(tileNumber));
+	else //-1 is no tile
+		m_tileOnMouse.setString(" ");
 }
 
 sf::Color ToggleButton::s_onColor{ 116, 116, 116 };

@@ -39,6 +39,7 @@ class TaskWindow
 {
 	static sf::Color s_backGround;
 	TileDisplay m_currentTileDisplay;
+	sf::Text m_tileOnMouse;
 public:
 	TaskWindow(sf::Vector2u size, sf::Texture *tileSet, sf::Vector2u &tileSize, sf::Font &font);
 	sf::Vector2u m_size;
@@ -48,8 +49,11 @@ public:
 	ToggleButton m_maskToggle;
 	ToggleButton m_lineToggle;
 	ToggleButton m_properties;
+	ToggleButton m_save;
+	ToggleButton m_load;
 	std::vector<ToggleButton*> m_buttons;
 	void display();
 	void handleClick(sf::Vector2i clickPoint);
 	void setCurrentTile(int tileNumber);
+	void setMouseTile(int tileNumber);
 };

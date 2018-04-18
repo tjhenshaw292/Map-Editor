@@ -75,7 +75,7 @@ int TileMap::getTileNumber(sf::Vector2f &position)
 		if (element.tileRect.contains(position))
 			return element.tileNumber;
 	}
-	return 0;
+	return -1;
 }
 
 int TileMap::getTileIndex(sf::Vector2f &position)
@@ -85,7 +85,7 @@ int TileMap::getTileIndex(sf::Vector2f &position)
 		if (m_tiles[i].tileRect.contains(position))
 			return i;
 	}
-	return 0;
+	return -1;
 }
 
 bool TileMap::contains(sf::Vector2f &point)
