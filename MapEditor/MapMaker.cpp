@@ -159,6 +159,8 @@ void MapMaker::display()
 				handleKeyHold(sf::Keyboard::N, sf::Mouse::getPosition(m_window));
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
 				handleKeyHold(sf::Keyboard::D, sf::Mouse::getPosition(m_window));
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::J))
+				handleKeyHold(sf::Keyboard::J, sf::Mouse::getPosition(m_window));
 			handleMovementKeys(sf::Mouse::getPosition(m_window).x);
 		}
 
@@ -339,6 +341,18 @@ void MapMaker::setProperty(sf::Text &letter, TileMap::TileProperty prop)
 		letter.setString('D');
 		letter.setFillColor(sf::Color::Blue);
 		break;
+	case TileMap::JUMP_DOWN:
+		letter.setString("JD");
+		letter.setFillColor(sf::Color(0, 255, 255)); //Turquoise
+		break;
+	case TileMap::JUMP_LEFT:
+		letter.setString("JL");
+		letter.setFillColor(sf::Color(0, 255, 255)); //Turquoise
+		break;
+	case TileMap::JUMP_RIGHT:
+		letter.setString("JR");
+		letter.setFillColor(sf::Color(0, 255, 255)); //Turquoise
+		break;
 	}
 	letter.setOrigin(sf::Vector2f(letter.getGlobalBounds().width / 2, letter.getGlobalBounds().height / 2));
 }
@@ -481,6 +495,13 @@ void MapMaker::handleKeyHold(sf::Keyboard::Key key, sf::Vector2i &position)
 			setProperty(m_letters[m_background.getTileIndex(actualPosition)], TileMap::DOOR);
 		}
 		break;
+	case sf::Keyboard::J:
+		if (m_background.contains(actualPosition))
+		{
+			m_background.m_tiles[m_background.getTileIndex(actualPosition)].tileProperty = TileMap::JUMP_DOWN;
+			setProperty(m_letters[m_background.getTileIndex(actualPosition)], TileMap::JUMP_DOWN);
+		}
+		break;
 	}
 	std::cout << m_background.getTileIndex(actualPosition) << std::endl;
 }
@@ -565,6 +586,35 @@ void MapMaker::handleKeyPress(sf::Event &eventy)
 		break;
 	case sf::Keyboard::P:
 		m_taskWindow->m_properties.toggle();
+		break;
+	case sf::Keyboard::PageUp:
+	case sf::Keyboard::PageDown:
+		//IF toggling jumps
+		sf::Vector2i mousePosition{ sf::Mouse::getPosition(m_window) };
+		if (mousePosition.x < static_cast<int>(s_maxWindowSize.x) / 2)
+		{
+			m_window.setView(m_mapScreen.getView());
+			sf::Vector2f actualPosition{ m_window.mapPixelToCoords(mousePosition) };
+			if (m_background.contains(actualPosition))
+			{
+				int tileIndex{ m_background.getTileIndex(actualPosition) };
+				switch (m_background.m_tiles[tileIndex].tileProperty)
+				{
+				case TileMap::JUMP_DOWN:
+					m_background.m_tiles[tileIndex].tileProperty = TileMap::JUMP_LEFT;
+					setProperty(m_letters[tileIndex], TileMap::JUMP_LEFT);
+					break;
+				case TileMap::JUMP_LEFT:
+					m_background.m_tiles[tileIndex].tileProperty = TileMap::JUMP_RIGHT;
+					setProperty(m_letters[tileIndex], TileMap::JUMP_RIGHT);
+					break;
+				case TileMap::JUMP_RIGHT:
+					m_background.m_tiles[tileIndex].tileProperty = TileMap::JUMP_DOWN;
+					setProperty(m_letters[tileIndex], TileMap::JUMP_DOWN);
+					break;
+				}
+			}
+		}
 		break;
 		//Map and Tile Screen Movement
 	/*case sf::Keyboard::Up:

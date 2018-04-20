@@ -5,7 +5,7 @@ class TileMap : public sf::Drawable, public sf::Transformable
 public:
 	enum TileProperty
 	{
-		NOTHING, BLOCKED, ACTION, WARP, SPECIAL, DOOR
+		NOTHING, BLOCKED, ACTION, WARP, SPECIAL, DOOR, JUMP_DOWN, JUMP_LEFT, JUMP_RIGHT
 	};
 
 private:
