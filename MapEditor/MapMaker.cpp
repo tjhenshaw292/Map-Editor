@@ -343,15 +343,15 @@ void MapMaker::setProperty(sf::Text &letter, TileMap::TileProperty prop)
 		break;
 	case TileMap::JUMP_DOWN:
 		letter.setString("JD");
-		letter.setFillColor(sf::Color(0, 255, 255)); //Turquoise
+		letter.setFillColor(sf::Color(0, 198, 198)); //Turquoise
 		break;
 	case TileMap::JUMP_LEFT:
 		letter.setString("JL");
-		letter.setFillColor(sf::Color(0, 255, 255)); //Turquoise
+		letter.setFillColor(sf::Color(0, 198, 198)); //Turquoise
 		break;
 	case TileMap::JUMP_RIGHT:
 		letter.setString("JR");
-		letter.setFillColor(sf::Color(0, 255, 255)); //Turquoise
+		letter.setFillColor(sf::Color(0, 198, 198)); //Turquoise
 		break;
 	}
 	letter.setOrigin(sf::Vector2f(letter.getGlobalBounds().width / 2, letter.getGlobalBounds().height / 2));
