@@ -2,12 +2,13 @@
 #include "MapMaker.h"
 #include "TaskBar.h"
 
-MapMaker::MapMaker(std::string tileSetName, sf::Vector2u tileSize, unsigned int xTiles, unsigned int yTiles):
-	m_tileSetName{ tileSetName }, 
-	m_tileSize{ tileSize }, 
+MapMaker::MapMaker(std::string tileSetName, sf::Vector2u tileSize, unsigned int xTiles, unsigned int yTiles) :
+	m_tileSetName{ tileSetName },
+	m_tileSize{ tileSize },
 	m_selectedTile{ 0 },
 	m_mapScreen{ sf::Vector2u(s_maxWindowSize.x / 2, s_maxWindowSize.y) },
-	m_tileScreen{ sf::Vector2u(s_maxWindowSize.x / 2, s_maxWindowSize.y) }
+	m_tileScreen{ sf::Vector2u(s_maxWindowSize.x / 2, s_maxWindowSize.y) },
+	m_blankTile{ 0 }
 {
 	if (!m_tileSet.loadFromFile(m_tileSetName))
 		throw;
@@ -37,6 +38,8 @@ MapMaker::MapMaker(std::string tileSetName, sf::Vector2u tileSize, unsigned int 
 
 void MapMaker::setBlankTile(int tileNumber)
 {
+	m_blankTile = tileNumber;
+
 	for (auto &element :  m_background.m_tiles)
 		element.tileNumber = tileNumber;
 	for (auto &element : m_foreground.m_tiles)
@@ -378,6 +381,15 @@ void MapMaker::updateMouseTile()
 {
 	sf::Vector2i position{ sf::Mouse::getPosition(m_window) };
 
+	//If not On Window do not handle
+	if (position.x < 0 || position.x > static_cast<int>(s_maxWindowSize.x) ||
+		position.y < 0 || position.y > static_cast<int>(s_maxWindowSize.y))
+	{
+		//set to empty string tile
+		m_taskWindow->setMouseTile(-1);
+		return;
+	}
+
 	if (position.x < static_cast<int>(s_maxWindowSize.x) / 2)
 	{
 		m_window.setView(m_mapScreen.getView());
@@ -396,13 +408,18 @@ void MapMaker::handleClick(sf::Mouse::Button button, sf::Vector2i &position)
 {
 	bool onMap;
 
+	//If not On Window do not handle
+	if (position.x < 0 || position.x > static_cast<int>(s_maxWindowSize.x) ||
+		position.y < 0 || position.y > static_cast<int>(s_maxWindowSize.y))
+		return;
+
 	//Set view to appropriate screen
 	if (position.x < static_cast<int>(s_maxWindowSize.x) / 2)
 	{
 		m_window.setView(m_mapScreen.getView());
 		onMap = true;
 	}
-	else
+	else if (position.x <= static_cast<int>(s_maxWindowSize.x))
 	{
 		m_window.setView(m_tileScreen.getView());
 		onMap = false;
@@ -443,6 +460,11 @@ void MapMaker::handleClick(sf::Mouse::Button button, sf::Vector2i &position)
 
 void MapMaker::handleKeyHold(sf::Keyboard::Key key, sf::Vector2i &position)
 {
+	//If not On Window do not handle
+	if (position.x < 0 || position.x > static_cast<int>(s_maxWindowSize.x) ||
+		position.y < 0 || position.y > static_cast<int>(s_maxWindowSize.y))
+		return;
+
 	//Set view to appropriate screen
 	if (position.x < static_cast<int>(s_maxWindowSize.x) / 2)
 		m_window.setView(m_mapScreen.getView());
@@ -567,6 +589,8 @@ void MapMaker::handleMouseScroll(sf::Event &eventy)
 
 void MapMaker::handleKeyPress(sf::Event &eventy)
 {
+	sf::Vector2i mousePosition;
+
 	switch (eventy.key.code)
 	{
 	case sf::Keyboard::L:
@@ -590,7 +614,7 @@ void MapMaker::handleKeyPress(sf::Event &eventy)
 	case sf::Keyboard::PageUp:
 	case sf::Keyboard::PageDown:
 		//IF toggling jumps
-		sf::Vector2i mousePosition{ sf::Mouse::getPosition(m_window) };
+		mousePosition = sf::Mouse::getPosition(m_window);
 		if (mousePosition.x < static_cast<int>(s_maxWindowSize.x) / 2)
 		{
 			m_window.setView(m_mapScreen.getView());
@@ -616,31 +640,10 @@ void MapMaker::handleKeyPress(sf::Event &eventy)
 			}
 		}
 		break;
-		//Map and Tile Screen Movement
-	/*case sf::Keyboard::Up:
-		if (sf::Mouse::getPosition(m_window).x < static_cast<int>(s_maxWindowSize.x) / 2)
-			m_mapScreen.move(UP, 30.0f);
-		else
-			m_tileScreen.move(UP, 30.0f);
+	case sf::Keyboard::BackSpace:
+		m_selectedTile = m_blankTile;
+		m_taskWindow->setCurrentTile(m_selectedTile);
 		break;
-	case sf::Keyboard::Down:
-		if (sf::Mouse::getPosition(m_window).x < static_cast<int>(s_maxWindowSize.x) / 2)
-			m_mapScreen.move(DOWN, 30.0f);
-		else
-			m_tileScreen.move(DOWN, 30.0f);
-		break;
-	case sf::Keyboard::Left:
-		if (sf::Mouse::getPosition(m_window).x < static_cast<int>(s_maxWindowSize.x) / 2)
-			m_mapScreen.move(LEFT, 30.0f);
-		else
-			m_tileScreen.move(LEFT, 30.0f);
-		break;
-	case sf::Keyboard::Right:
-		if (sf::Mouse::getPosition(m_window).x < static_cast<int>(s_maxWindowSize.x) / 2)
-			m_mapScreen.move(RIGHT, 30.0f);
-		else
-			m_tileScreen.move(RIGHT, 30.0f);
-		break;*/
 	}
 }
 

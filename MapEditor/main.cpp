@@ -7,9 +7,9 @@ int main()
 		throw;
 	MapMaker makeMe("pokeTiles2.png", sf::Vector2u(16, 16), 32, 69);
 	makeMe.setBlankTile(551);
-	makeMe.setMapFileName("ImmaRealBoy.dat");
-	makeMe.load("ImmaRealBoy.dat");
+	makeMe.setMapFileName("superMaze.dat");
+	makeMe.load("superMaze.dat");
 	makeMe.display();
-	makeMe.save("ImmaRealBoy.dat");
+	makeMe.save("superMaze.dat");
 	return 0;
 }

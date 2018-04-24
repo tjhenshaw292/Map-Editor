@@ -51,6 +51,7 @@ class MapMaker
 	std::vector<sf::Text> m_letters;
 	unsigned int m_windowHeight;
 	int m_selectedTile;
+	int m_blankTile;
 	std::string m_mapName;
 
 	void createLines();
