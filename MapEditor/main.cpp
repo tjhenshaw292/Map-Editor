@@ -7,9 +7,9 @@ int main()
 		throw;
 	MapMaker makeMe("pokeTiles2.png", sf::Vector2u(16, 16), 19, 69);
 	makeMe.setBlankTile(551);
-	makeMe.setMapFileName("route01.dat");
-	makeMe.load("route01.dat");
+	makeMe.setMapFileName("bertHouse.dat");
+	makeMe.load("bertHouse.dat");
 	makeMe.display();
-	makeMe.save("route01.dat");
+	makeMe.save("bertHouse.dat");
 	return 0;
 }
