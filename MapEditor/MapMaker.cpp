@@ -164,6 +164,8 @@ void MapMaker::display()
 				handleKeyHold(sf::Keyboard::D, sf::Mouse::getPosition(m_window));
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::J))
 				handleKeyHold(sf::Keyboard::J, sf::Mouse::getPosition(m_window));
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::C))
+				handleKeyHold(sf::Keyboard::C, sf::Mouse::getPosition(m_window));
 			handleMovementKeys(sf::Mouse::getPosition(m_window).x);
 		}
 
@@ -356,6 +358,10 @@ void MapMaker::setProperty(sf::Text &letter, TileMap::TileProperty prop)
 		letter.setString("JR");
 		letter.setFillColor(sf::Color(0, 198, 198)); //Turquoise
 		break;
+	case TileMap::CUTSCENE:
+		letter.setString("C");
+		letter.setFillColor(sf::Color::Yellow);
+		break;
 	}
 	letter.setOrigin(sf::Vector2f(letter.getGlobalBounds().width / 2, letter.getGlobalBounds().height / 2));
 }
@@ -522,6 +528,13 @@ void MapMaker::handleKeyHold(sf::Keyboard::Key key, sf::Vector2i &position)
 		{
 			m_background.m_tiles[m_background.getTileIndex(actualPosition)].tileProperty = TileMap::JUMP_DOWN;
 			setProperty(m_letters[m_background.getTileIndex(actualPosition)], TileMap::JUMP_DOWN);
+		}
+		break;
+	case sf::Keyboard::C:
+		if (m_background.contains(actualPosition))
+		{
+			m_background.m_tiles[m_background.getTileIndex(actualPosition)].tileProperty = TileMap::CUTSCENE;
+			setProperty(m_letters[m_background.getTileIndex(actualPosition)], TileMap::CUTSCENE);
 		}
 		break;
 	}
