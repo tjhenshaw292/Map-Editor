@@ -88,6 +88,166 @@ int TileMap::getTileIndex(sf::Vector2f &position)
 	return -1;
 }
 
+void TileMap::addColumnToRight(int tileNumber)
+{
+	//Get Tile size
+	sf::Vector2u tileSize{ m_size.x / m_tileAmount.x, m_size.y / m_tileAmount.y };
+
+	//Add Column
+	m_tileAmount.x += 1;
+
+	//Change size
+	m_size.x = m_tileAmount.x * tileSize.x;
+	m_vertices.resize(m_tileAmount.x * m_tileAmount.y * 4);
+
+	//Create tile to add
+	Tile addedTile;
+	addedTile.tileNumber = tileNumber;
+	addedTile.tileProperty = NOTHING;
+
+	//Insert Column to Tile Vector
+	std::vector<Tile> oldTiles{ m_tiles };
+	m_tiles.resize(m_tileAmount.x * m_tileAmount.y);
+	int skippedTiles{ 0 };
+	for (unsigned int row{ 0 }; row < m_tileAmount.y; row++)
+	{
+		for (unsigned int column{ 0 }; column < m_tileAmount.x; column++)
+		{
+			//If on last column, add new tile instead of copying old one
+			if (column < m_tileAmount.x - 1)
+				m_tiles[column + row * m_tileAmount.x] = oldTiles[column + row * m_tileAmount.x - skippedTiles];
+			else
+			{
+				m_tiles[column + row * m_tileAmount.x] = addedTile;
+				skippedTiles++;
+			}
+		}
+	}
+
+	sectionTiles(tileSize);
+	reAssign(tileSize);
+}
+
+void TileMap::addColumnToLeft(int tileNumber)
+{
+	//Get Tile size
+	sf::Vector2u tileSize{ m_size.x / m_tileAmount.x, m_size.y / m_tileAmount.y };
+
+	//Add Column
+	m_tileAmount.x += 1;
+
+	//Change size
+	m_size.x = m_tileAmount.x * tileSize.x;
+	m_vertices.resize(m_tileAmount.x * m_tileAmount.y * 4);
+
+	//Create tile to add
+	Tile addedTile;
+	addedTile.tileNumber = tileNumber;
+	addedTile.tileProperty = NOTHING;
+
+	//Insert Column to Tile Vector
+	std::vector<Tile> oldTiles{ m_tiles };
+	m_tiles.resize(m_tileAmount.x * m_tileAmount.y);
+	int skippedTiles{ 0 };
+	for (unsigned int row{ 0 }; row < m_tileAmount.y; row++)
+	{
+		for (unsigned int column{ 0 }; column < m_tileAmount.x; column++)
+		{
+			//If on first column, add new tile instead of copying old one
+			if (column != 0)
+				m_tiles[column + row * m_tileAmount.x] = oldTiles[column + row * m_tileAmount.x - skippedTiles];
+			else
+			{
+				m_tiles[column + row * m_tileAmount.x] = addedTile;
+				skippedTiles++;
+			}
+		}
+	}
+
+	sectionTiles(tileSize);
+	reAssign(tileSize);
+}
+
+void TileMap::addRowToTop(int tileNumber)
+{
+	//Get Tile size
+	sf::Vector2u tileSize{ m_size.x / m_tileAmount.x, m_size.y / m_tileAmount.y };
+
+	//Add Row
+	m_tileAmount.y += 1;
+
+	//Change size
+	m_size.y = m_tileAmount.y * tileSize.y;
+	m_vertices.resize(m_tileAmount.x * m_tileAmount.y * 4);
+
+	//Create tile to add
+	Tile addedTile;
+	addedTile.tileNumber = tileNumber;
+	addedTile.tileProperty = NOTHING;
+
+	//Insert Row to Tile Vector
+	std::vector<Tile> oldTiles{ m_tiles };
+	m_tiles.resize(m_tileAmount.x * m_tileAmount.y);
+	int skippedTiles{ 0 };
+	for (unsigned int row{ 0 }; row < m_tileAmount.y; row++)
+	{
+		for (unsigned int column{ 0 }; column < m_tileAmount.x; column++)
+		{
+			//If on first row, add new tile instead of copying old one
+			if (row != 0)
+				m_tiles[column + row * m_tileAmount.x] = oldTiles[column + row * m_tileAmount.x - skippedTiles];
+			else
+			{
+				m_tiles[column + row * m_tileAmount.x] = addedTile;
+				skippedTiles++;
+			}
+		}
+	}
+
+	sectionTiles(tileSize);
+	reAssign(tileSize);
+}
+
+void TileMap::addRowToBottow(int tileNumber)
+{
+	//Get Tile size
+	sf::Vector2u tileSize{ m_size.x / m_tileAmount.x, m_size.y / m_tileAmount.y };
+
+	//Add Row
+	m_tileAmount.y += 1;
+
+	//Change size
+	m_size.y = m_tileAmount.y * tileSize.y;
+	m_vertices.resize(m_tileAmount.x * m_tileAmount.y * 4);
+
+	//Create tile to add
+	Tile addedTile;
+	addedTile.tileNumber = tileNumber;
+	addedTile.tileProperty = NOTHING;
+
+	//Insert Row to Tile Vector
+	std::vector<Tile> oldTiles{ m_tiles };
+	m_tiles.resize(m_tileAmount.x * m_tileAmount.y);
+	int skippedTiles{ 0 };
+	for (unsigned int row{ 0 }; row < m_tileAmount.y; row++)
+	{
+		for (unsigned int column{ 0 }; column < m_tileAmount.x; column++)
+		{
+			//If on last row, add new tile instead of copying old one
+			if (row < m_tileAmount.y - 1)
+				m_tiles[column + row * m_tileAmount.x] = oldTiles[column + row * m_tileAmount.x - skippedTiles];
+			else
+			{
+				m_tiles[column + row * m_tileAmount.x] = addedTile;
+				skippedTiles++;
+			}
+		}
+	}
+
+	sectionTiles(tileSize);
+	reAssign(tileSize);
+}
+
 bool TileMap::contains(sf::Vector2f &point)
 {
 	return m_mapRect.contains(point);

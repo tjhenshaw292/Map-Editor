@@ -9,6 +9,9 @@ int main()
 	makeMe.setBlankTile(551);
 	makeMe.setMapFileName("route01.dat");
 	makeMe.load("route01.dat");
+
+	makeMe.addColumnToRight(1);
+
 	makeMe.display();
 	makeMe.save("route01.dat");
 	return 0;

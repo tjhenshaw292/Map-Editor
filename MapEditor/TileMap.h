@@ -30,6 +30,11 @@ public:
 	bool contains(sf::Vector2i &point);
 	int getTileNumber(sf::Vector2f &position);
 	int getTileIndex(sf::Vector2f &position);
+	//Adds Column on Right Side of Tilemap to desired tile number
+	void addColumnToRight(int tileNumber);
+	void addColumnToLeft(int tileNumber);
+	void addRowToTop(int tileNumber);
+	void addRowToBottow(int tileNumber);
 	sf::Vector2u& getSize();
 	sf::Vector2u& getTileAmount();
 	std::vector<Tile> m_tiles;

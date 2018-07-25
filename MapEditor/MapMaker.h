@@ -49,7 +49,6 @@ class MapMaker
 	sf::VertexArray m_mapLines;
 	sf::VertexArray m_tileLines;
 	std::vector<sf::Text> m_letters;
-	unsigned int m_windowHeight;
 	int m_selectedTile;
 	int m_blankTile;
 	std::string m_mapName;
@@ -76,6 +75,10 @@ public:
 	void display();
 	void save(std::string fileName);
 	void load(std::string fileName);
+	void addColumnToRight(int amount);
+	void addColumnToLeft(int amount);
+	void addRowToTop(int amount);
+	void addRowToBottow(int amount);
 	static sf::Font mainFont;
 	~MapMaker();
 };

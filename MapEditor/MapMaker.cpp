@@ -27,7 +27,6 @@ MapMaker::MapMaker(std::string tileSetName, sf::Vector2u tileSize, unsigned int 
 	m_tileSheet.reAssign(m_tileSize);
 	m_mask.reAssign(m_tileSize);
 
-	m_windowHeight = m_background.getSize().y >= m_tileSheet.getSize().y ? m_background.getSize().y : m_tileSheet.getSize().y; //get bigger height
 	m_tileSheet.setPosition(static_cast<float>(m_background.getSize().x), 0);
 	createLines();
 	m_background.sectionTiles(m_tileSize);
@@ -59,7 +58,6 @@ void MapMaker::setMapFileName(std::string name)
 
 void MapMaker::display()
 {
-	unsigned int windowWidth{ m_background.getSize().x + m_tileSheet.getSize().x };
 
 	sf::Vector2f mapRatioToTileset;
 
@@ -108,7 +106,6 @@ void MapMaker::display()
 	m_tileScreen.setViewport(m_tileViewport);
 
 
-	//m_window.create(sf::VideoMode(windowWidth, m_windowHeight), "Map Editor");
 	m_window.create(sf::VideoMode(s_maxWindowSize.x, s_maxWindowSize.y), "Map Editor");
 	m_window.setKeyRepeatEnabled(false);
 
@@ -136,7 +133,7 @@ void MapMaker::display()
 			if (eventy.type == sf::Event::MouseWheelScrolled)
 				handleMouseScroll(eventy);
 			if (eventy.type == sf::Event::Resized)
-				m_window.setSize(sf::Vector2u(windowWidth, m_windowHeight));
+				m_window.setSize(sf::Vector2u(s_maxWindowSize.x, s_maxWindowSize.y));
 			if (eventy.type == sf::Event::Closed)
 				m_window.close();
 		}
@@ -710,6 +707,66 @@ void MapMaker::load(std::string fileName)
 	m_mask.reAssign(m_tileSize);
 
 	input.close();
+}
+
+void MapMaker::addColumnToRight(int amount)
+{
+	while (amount--)
+	{
+		m_background.addColumnToRight(m_blankTile);
+		m_foreground.addColumnToRight(m_blankTile);
+		m_mask.addColumnToRight(m_blankTile);
+	}
+
+	m_tileSheet.setPosition(static_cast<float>(m_background.getSize().x), 0);
+	createLines();
+	createLetters();
+	m_mapScreen.assignTileMap(m_background);
+}
+
+void MapMaker::addColumnToLeft(int amount)
+{
+	while (amount--)
+	{
+		m_background.addColumnToLeft(m_blankTile);
+		m_foreground.addColumnToLeft(m_blankTile);
+		m_mask.addColumnToLeft(m_blankTile);
+	}
+
+	m_tileSheet.setPosition(static_cast<float>(m_background.getSize().x), 0);
+	createLines();
+	createLetters();
+	m_mapScreen.assignTileMap(m_background);
+}
+
+void MapMaker::addRowToTop(int amount)
+{
+	while (amount--)
+	{
+		m_background.addRowToTop(m_blankTile);
+		m_foreground.addRowToTop(m_blankTile);
+		m_mask.addRowToTop(m_blankTile);
+	}
+
+	m_tileSheet.setPosition(static_cast<float>(m_background.getSize().x), 0);
+	createLines();
+	createLetters();
+	m_mapScreen.assignTileMap(m_background);
+}
+
+void MapMaker::addRowToBottow(int amount)
+{
+	while (amount--)
+	{
+		m_background.addRowToBottow(m_blankTile);
+		m_foreground.addRowToBottow(m_blankTile);
+		m_mask.addRowToBottow(m_blankTile);
+	}
+
+	m_tileSheet.setPosition(static_cast<float>(m_background.getSize().x), 0);
+	createLines();
+	createLetters();
+	m_mapScreen.assignTileMap(m_background);
 }
 
 MapMaker::~MapMaker()
