@@ -307,6 +307,8 @@ void MapMaker::createLetters()
 	letter.setFont(mainFont);
 	letter.setStyle(sf::Text::Bold);
 	letter.setCharacterSize(14);
+
+	m_letters.clear();
 	
 	for (auto &element : m_background.m_tiles)
 	{
