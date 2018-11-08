@@ -5,16 +5,16 @@ int main()
 {
 	if (!MapMaker::mainFont.loadFromFile("Carlito-Regular.ttf"))
 		throw;
-	MapMaker makeMe("pokeTiles2.png", sf::Vector2u(16, 16), 44, 42);
+	MapMaker makeMe("pokeTiles2.png", sf::Vector2u(16, 16), 14, 6);
 	makeMe.setBlankTile(551);
-	makeMe.setMapFileName("town1.dat");
-	makeMe.load("town1.dat");
+	makeMe.setMapFileName("wideHouse.dat");
+	//makeMe.load("wideHouse.dat");
 
 	//In order to use this, just add the row/col then reOpen mapmaker
 	//makeMe.addColumnToLeft(1);
 	//makeMe.addColumnToRight(1);
 
 	makeMe.display();
-	makeMe.save("town1.dat");
+	makeMe.save("wideHouse.dat");
 	return 0;
 }
