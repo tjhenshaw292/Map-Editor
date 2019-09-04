@@ -5,10 +5,10 @@ int main()
 {
 	if (!MapMaker::mainFont.loadFromFile("Carlito-Regular.ttf"))
 		throw;
-	MapMaker makeMe("pokeTiles2.png", sf::Vector2u(16, 16), 20, 69);
+	MapMaker makeMe("pokeTiles2.png", sf::Vector2u(16, 16), 44, 42);
 	makeMe.setBlankTile(551);
-	makeMe.setMapFileName("burtHouse.dat");
-	makeMe.load("burtHouse.dat");
+	makeMe.setMapFileName("town1.dat");
+	makeMe.load("town1.dat");
 
 	//In order to use this, just add the row/col then reOpen mapmaker
 	//makeMe.addColumnToLeft(1);
