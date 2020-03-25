@@ -685,8 +685,49 @@ void MapMaker::save(std::string fileName)
 		output << element.tileNumber << " ";
 	for (auto &element : m_mask.m_tiles)
 		output << element.tileNumber << " ";
-	for (auto &element : m_background.m_tiles)
-		output << element.tileProperty << " ";
+	for (auto& element : m_background.m_tiles)
+	{
+			switch (element.tileProperty)
+			{
+			case TileMap::NOTHING:
+				output << 0 << " ";
+				break;
+			case TileMap::BLOCKED:
+				output << 1 << " ";
+				break;
+			case TileMap::ACTION:
+				output << 2 << " ";
+				break;
+			case TileMap::WARP:
+				output << 3 << " ";
+				break;
+			case TileMap::SPECIAL:
+				output << 4 << " ";
+				break;
+			case TileMap::DOOR:
+				output << 5 << " ";
+				break;
+			case TileMap::JUMP_DOWN:
+				output << 6 << " ";
+				break;
+			case TileMap::JUMP_LEFT:
+				output << 7 << " ";
+				break;
+			case TileMap::JUMP_RIGHT:
+				output << 8 << " ";
+				break;
+			case TileMap::CUTSCENE:
+				output << 9 << " ";
+				break;
+			case TileMap::WATER:
+				output << 10 << " ";
+				break;
+			default:
+				output << 0 << " ";
+				break;
+			}
+			output << static_cast<int>(element.tileProperty) << " ";
+	}
 	output.close();
 }
 
@@ -708,12 +749,47 @@ void MapMaker::load(std::string fileName)
 	for (auto &element : m_mask.m_tiles)
 		input >> element.tileNumber;
 
-	int temp;
+	int temp{ 0 };
 	int i{ 0 };
 	for (auto &element : m_background.m_tiles)
 	{
 		input >> temp;
-		element.tileProperty = static_cast<TileMap::TileProperty>(temp);
+		switch (temp)
+		{
+		case 1:
+			element.tileProperty = TileMap::BLOCKED;
+			break;
+		case 2:
+			element.tileProperty = TileMap::ACTION;
+			break;
+		case 3:
+			element.tileProperty = TileMap::WARP;
+			break;
+		case 4:
+			element.tileProperty = TileMap::SPECIAL;
+			break;
+		case 5:
+			element.tileProperty = TileMap::DOOR;
+			break;
+		case 6:
+			element.tileProperty = TileMap::JUMP_DOWN;
+			break;
+		case 7:
+			element.tileProperty = TileMap::JUMP_LEFT;
+			break;
+		case 8:
+			element.tileProperty = TileMap::JUMP_RIGHT;
+			break;
+		case 9:
+			element.tileProperty = TileMap::CUTSCENE;
+			break;
+		case 10:
+			element.tileProperty = TileMap::WATER;
+			break;
+		default:
+			element.tileProperty = TileMap::NOTHING;
+			break;
+		}
 		setProperty(m_letters[i++], element.tileProperty);
 	}
 
