@@ -726,7 +726,6 @@ void MapMaker::save(std::string fileName)
 				output << 0 << " ";
 				break;
 			}
-			output << static_cast<int>(element.tileProperty) << " ";
 	}
 	output.close();
 }
