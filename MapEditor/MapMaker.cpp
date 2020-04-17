@@ -367,6 +367,10 @@ void MapMaker::setProperty(sf::Text &letter, TileMap::TileProperty prop)
 		letter.setString("T");
 		letter.setFillColor(sf::Color(255, 127, 39)); //Orange
 		break;
+	case TileMap::BLOCK_CLIFF:
+		letter.setString("BC");
+		letter.setFillColor(sf::Color::Red);
+		break;
 	}
 	letter.setOrigin(sf::Vector2f(letter.getGlobalBounds().width / 2, letter.getGlobalBounds().height / 2));
 }
@@ -661,6 +665,14 @@ void MapMaker::handleKeyPress(sf::Event &eventy)
 					m_background.m_tiles[tileIndex].tileProperty = TileMap::JUMP_DOWN;
 					setProperty(m_letters[tileIndex], TileMap::JUMP_DOWN);
 					break;
+				case TileMap::BLOCKED:
+					m_background.m_tiles[tileIndex].tileProperty = TileMap::BLOCK_CLIFF;
+					setProperty(m_letters[tileIndex], TileMap::BLOCK_CLIFF);
+					break;
+				case TileMap::BLOCK_CLIFF:
+					m_background.m_tiles[tileIndex].tileProperty = TileMap::BLOCKED;
+					setProperty(m_letters[tileIndex], TileMap::BLOCKED);
+					break;
 				}
 			}
 		}
@@ -721,6 +733,9 @@ void MapMaker::save(std::string fileName)
 				break;
 			case TileMap::WATER:
 				output << 10 << " ";
+				break;
+			case TileMap::BLOCK_CLIFF:
+				output << 11 << " ";
 				break;
 			default:
 				output << 0 << " ";
@@ -784,6 +799,9 @@ void MapMaker::load(std::string fileName)
 			break;
 		case 10:
 			element.tileProperty = TileMap::WATER;
+			break;
+		case 11:
+			element.tileProperty = TileMap::BLOCK_CLIFF;
 			break;
 		default:
 			element.tileProperty = TileMap::NOTHING;
