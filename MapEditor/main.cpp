@@ -5,7 +5,7 @@ int main()
 {
 	if (!MapMaker::mainFont.loadFromFile("Carlito-Regular.ttf"))
 		throw;
-	MapMaker makeMe("pokeTiles3.png", sf::Vector2u(16, 16), 20, 20);
+	MapMaker makeMe("gen3Outdoors.png", sf::Vector2u(16, 16), 21, 20);
 	makeMe.setBlankTile(0);
 
 	std::string fileName{ "town02.dat" };
