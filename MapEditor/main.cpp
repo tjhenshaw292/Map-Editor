@@ -8,7 +8,7 @@ int main()
 	MapMaker makeMe("gen3Outdoors.png", sf::Vector2u(16, 16), 20, 45);
 	makeMe.setBlankTile(0);
 
-	std::string fileName{ "route03.dat" };
+	std::string fileName{ "goldenBridge.dat" };
 
 	makeMe.setMapFileName(fileName);
 	makeMe.load(fileName);
