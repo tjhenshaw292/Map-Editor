@@ -5,10 +5,10 @@ int main()
 {
 	if (!MapMaker::mainFont.loadFromFile("Carlito-Regular.ttf"))
 		throw;
-	MapMaker makeMe("gen1.png", sf::Vector2u(16, 16), 100, 25);
+	MapMaker makeMe("gen1.png", sf::Vector2u(16, 16), 12, 8);
 	makeMe.setBlankTile(551);
 
-	std::string fileName{ "route03.dat" };
+	std::string fileName{ "houseOnBikePath.dat" };
 
 	makeMe.setMapFileName(fileName);
 	makeMe.load(fileName);
