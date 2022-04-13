@@ -11,7 +11,7 @@ int main()
 	std::string fileName{ "stadiumRoom5.dat" };
 
 	makeMe.setMapFileName(fileName);
-	//makeMe.load(fileName);
+	makeMe.load(fileName);
 
 	//In order to use this, just add the row/col then reOpen mapmaker
 	//makeMe.addRowToTop(1);
