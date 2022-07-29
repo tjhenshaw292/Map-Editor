@@ -5,10 +5,10 @@ int main()
 {
 	if (!MapMaker::mainFont.loadFromFile("Carlito-Regular.ttf"))
 		throw;
-	MapMaker makeMe("gen3indoors.png", sf::Vector2u(16, 16), 7, 19);
-	makeMe.setBlankTile(0); //551 for gen 1.....0 for gen 3
+	MapMaker makeMe("gen1.png", sf::Vector2u(16, 16), 50, 22);
+	makeMe.setBlankTile(551); //551 for gen 1.....0 for gen 3
 
-	std::string fileName{ "stadiumRoom6.dat" };
+	std::string fileName{ "town03.dat" };
 
 	makeMe.setMapFileName(fileName);
 	makeMe.load(fileName);
